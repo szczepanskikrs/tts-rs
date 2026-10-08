@@ -2,6 +2,8 @@ use std::path::Path;
 use epub::doc::EpubDoc;
 use scraper::{Html, Selector};
 
+pub mod chunker;
+
 #[derive(Debug, Clone)]
 pub struct Chapter {
     pub id: String,
