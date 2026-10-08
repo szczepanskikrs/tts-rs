@@ -27,17 +27,17 @@ pub struct Book {
 
 pub fn parse_epub<P: AsRef<Path>>(path: P) -> Result<Book, String> {
     let mut doc = EpubDoc::new(path.as_ref())
-        .map_err(|e| format!("Błąd otwierania pliku EPUB: {e}"))?;
+        .map_err(|e| format!("Failed to open EPUB file: {e}"))?;
 
     let title = doc
         .mdata("title")
         .map(|m| m.value.clone())
-        .unwrap_or_else(|| "Nieznany tytuł".to_string());
+        .unwrap_or_else(|| "Unknown title".to_string());
 
     let author = doc
         .mdata("creator")
         .map(|m| m.value.clone())
-        .unwrap_or_else(|| "Nieznany autor".to_string());
+        .unwrap_or_else(|| "Unknown author".to_string());
 
     let (cover_image, cover_mime) = match doc.get_cover() {
         Some(cover) => (Some(cover.0), Some(cover.1)),
@@ -56,7 +56,7 @@ pub fn parse_epub<P: AsRef<Path>>(path: P) -> Result<Book, String> {
 
                 if clean_text.trim().len() > 30 {
                     let page_title = extract_title(&text_raw).unwrap_or_else(|| {
-                        format!("Rozdział {}", chapters.len() + 1)
+                        format!("Chapter {}", chapters.len() + 1)
                     });
 
                     let word_count = clean_text.split_whitespace().count();
@@ -74,7 +74,7 @@ pub fn parse_epub<P: AsRef<Path>>(path: P) -> Result<Book, String> {
     }
 
     if chapters.is_empty() {
-        return Err("Nie znaleziono czytelnych rozdziałów w pliku EPUB.".to_string());
+        return Err("No readable chapters found in the EPUB file.".to_string());
     }
 
     Ok(Book {
@@ -144,17 +144,17 @@ mod tests {
             <html>
                 <head><style>p { color: red; }</style></head>
                 <body>
-                    <h1>Rozdział 1</h1>
-                    <p>To jest pierwszy akapit książki.</p>
-                    <p>A to jest drugi akapit, z polskimi znakami: ą, ć, ę, ł, ń, ó, ś, ź, ż.</p>
+                    <h1>Chapter 1</h1>
+                    <p>This is the first paragraph of the book.</p>
+                    <p>And this is the second paragraph with special characters: ą, ć, ę, ł, ń, ó, ś, ź, ż.</p>
                 </body>
             </html>
         "#;
 
         let cleaned = clean_html_content(sample);
-        assert!(cleaned.contains("Rozdział 1"));
-        assert!(cleaned.contains("To jest pierwszy akapit książki."));
-        assert!(cleaned.contains("polskimi znakami"));
+        assert!(cleaned.contains("Chapter 1"));
+        assert!(cleaned.contains("This is the first paragraph of the book."));
+        assert!(cleaned.contains("special characters"));
         assert!(!cleaned.contains("color: red"));
     }
 }
