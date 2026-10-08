@@ -1,0 +1,8 @@
+[package]
+name = "tts-epub"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+epub = "2.1"
+scraper = "0.27"
